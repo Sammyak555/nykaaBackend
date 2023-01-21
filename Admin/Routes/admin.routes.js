@@ -56,7 +56,7 @@ adminRouter.delete('/:id',async(req,res)=>{
     const id=req.params.id
     try{
        const person =  await UserModel.findByIdAndDelete({"_id":id})
-       const blockperson = await AdminModel.findById({"_id":"63cbf46d5a0fd6e4539c5fc8"})
+       const blockperson = await AdminModel.findById({"_id":"63ca91895a0eb8269540a17d"})
        blockperson.blockeduser.push(person)
        blockperson.save()
         res.send(blockperson)
