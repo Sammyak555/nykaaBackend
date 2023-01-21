@@ -22,7 +22,7 @@ userRouter.post('/register',async(req,res)=>{
 
     try{
         let user=await UserModel.find({email})
-        const admin = await AdminModel.findById({"_id":"63ca91895a0eb8269540a17d"})
+        const admin = await AdminModel.findById({"_id":"63cbf46d5a0fd6e4539c5fc8"})
         const blockperson=admin.blockeduser
         
        const filtper = blockperson.filter((el)=>{

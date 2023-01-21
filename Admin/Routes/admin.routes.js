@@ -39,7 +39,7 @@ adminRouter.post('/login',async(req,res)=>{
             bcrypt.compare(password, admin[0].password, async(err, result) => {
                 if(result){
                     var token = jwt.sign({ adminID:admin[0]._id }, 'newadmin');
-                    res.send({"msg":"Logged in !","admintoken":token})
+                    res.send({"msg":"Logged in !","admintoken":token,"adminname":admin[0].name})
                 }else{
                     res.send("Wrong Credentials !")
                 }
@@ -56,7 +56,7 @@ adminRouter.delete('/:id',async(req,res)=>{
     const id=req.params.id
     try{
        const person =  await UserModel.findByIdAndDelete({"_id":id})
-       const blockperson = await AdminModel.findById({"_id":"63ca91895a0eb8269540a17d"})
+       const blockperson = await AdminModel.findById({"_id":"63cbf46d5a0fd6e4539c5fc8"})
        blockperson.blockeduser.push(person)
        blockperson.save()
         res.send(blockperson)
