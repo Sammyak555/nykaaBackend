@@ -10,6 +10,7 @@ skinRouter.get('/',async(req,res)=>{
     const pages = req.query._page
     try{
         const skins = await SkinModel.find().limit(query).skip((pages-1)*query)
+        res.send(skins)
     }catch(err){
         res.send(err)
     }
