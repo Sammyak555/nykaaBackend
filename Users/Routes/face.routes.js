@@ -6,8 +6,10 @@ const faceRouter = express.Router();
 faceRouter.use(express.json())
 
 faceRouter.get('/',async(req,res)=>{
+    const query = req.query._limit
+    const pages = req.query._page
     try{
-        const faces = await FaceModel.find()
+        const faces = await FaceModel.find().limit(query).skip((pages-1)*query)
         res.send(faces)
     }catch(err){
         res.send(err)

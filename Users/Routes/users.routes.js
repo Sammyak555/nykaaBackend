@@ -9,8 +9,10 @@ userRouter.use(express.json())
 
 
 userRouter.get('/',async(req,res)=>{
+    const query = req.query._limit
+    const pages = req.query._page
     try{
-       const users = await UserModel.find()
+       const users = await UserModel.find().limit(query).skip((pages-1)*query)
         res.send(users)
     }catch(err){
         res.send(err.message)

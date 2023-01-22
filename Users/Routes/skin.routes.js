@@ -6,9 +6,10 @@ const skinRouter = express.Router();
 skinRouter.use(express.json())
 
 skinRouter.get('/',async(req,res)=>{
+    const query = req.query._limit
+    const pages = req.query._page
     try{
-        const skins = await SkinModel.find()
-        res.send(skins)
+        const skins = await SkinModel.find().limit(query).skip((pages-1)*query)
     }catch(err){
         res.send(err)
     }
