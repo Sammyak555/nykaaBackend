@@ -15,6 +15,16 @@ faceRouter.get('/',async(req,res)=>{
         res.send(err)
     }
 })
+faceRouter.get('/:id',async(req,res)=>{
+    const id=req.params.id
+    try{
+        const faces = await FaceModel.find({"_id":id})
+        res.send(faces)
+    }catch(err){
+        res.send(err)
+    }
+})
+
 
 faceRouter.get('/priceasc',async(req,res)=>{
     try{

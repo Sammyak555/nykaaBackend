@@ -15,6 +15,15 @@ skinRouter.get('/',async(req,res)=>{
         res.send(err)
     }
 })
+skinRouter.get('/:id',async(req,res)=>{
+    const id = req.params.id
+    try{
+        const skins = await SkinModel.find({"_id":id})
+        res.send(skins)
+    }catch(err){
+        res.send(err)
+    }
+})
 
 skinRouter.get('/priceasc',async(req,res)=>{
     try{
