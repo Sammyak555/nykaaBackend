@@ -13,6 +13,7 @@ const faceSchema = mongoose.Schema({
     preview:String
 })
 
+
 const FaceModel = mongoose.model('face',faceSchema)
 
 module.exports = {
