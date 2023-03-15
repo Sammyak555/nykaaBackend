@@ -19,6 +19,9 @@ app.use("/skin", skinRouter);
 app.use("/cart", cartRouter);
 app.use("/address", addressRouter);
 
+app.get("/", (req, res) => {
+  res.send("welcome to the nykaa clone backend project")
+})
 app.listen(process.env.port, async (req, res) => {
   try {
     await connection;
