@@ -18,6 +18,35 @@ userRouter.get("/", async (req, res) => {
   }
 });
 
+userRouter.get("/:id", async (req, res) => {
+  const id = req.params.id;
+
+  try {
+    const users = await UserModel.find({ _id: id });
+    res.send(users);
+  } catch (err) {
+    res.send(err.message);
+  }
+});
+
+userRouter.patch("/paymentSuccess/:id", async (req, res) => {
+  const id = req.params.id;
+  const payload = {
+    cart: [],
+    address: [],
+  };
+  try {
+    const user = await UserModel.updateOne({ _id: id }, payload);
+    res.send({
+      message: "Payment Successfully",
+    });
+  } catch (err) {
+    res.send({
+      message: err.message,
+    });
+  }
+});
+
 userRouter.post("/register", async (req, res) => {
   const { name, email, password, phone } = req.body;
   if (name && email && password && phone) {
@@ -98,6 +127,7 @@ userRouter.post("/login", async (req, res) => {
     });
   }
 });
+
 userRouter.delete("/delete/:id", async (req, res) => {
   const id = req.params.id;
   try {
