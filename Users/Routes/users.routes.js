@@ -1,90 +1,143 @@
-const express = require('express')
-const bcrypt = require('bcrypt');
-var jwt = require('jsonwebtoken');
-const { UserModel } = require('../Models/user.model');
-const { AdminModel } = require('../../Admin/Models/admin.model');
+const express = require("express");
+const bcrypt = require("bcrypt");
+var jwt = require("jsonwebtoken");
+const { UserModel } = require("../Models/user.model");
+const { AdminModel } = require("../../Admin/Models/admin.model");
 const userRouter = express.Router();
 
-userRouter.use(express.json())
+userRouter.get("/", async (req, res) => {
+  const query = req.query._limit;
+  const pages = req.query._page;
+  try {
+    const users = await UserModel.find()
+      .limit(query)
+      .skip((pages - 1) * query);
+    res.send(users);
+  } catch (err) {
+    res.send(err.message);
+  }
+});
 
+userRouter.get("/:id", async (req, res) => {
+  const id = req.params.id;
 
-userRouter.get('/',async(req,res)=>{
-    const query = req.query._limit
-    const pages = req.query._page
-    try{
-       const users = await UserModel.find().limit(query).skip((pages-1)*query)
-        res.send(users)
-    }catch(err){
-        res.send(err.message)
-    }
-})
+  try {
+    const users = await UserModel.find({ _id: id });
+    res.send(users);
+  } catch (err) {
+    res.send(err.message);
+  }
+});
 
-userRouter.post('/register',async(req,res)=>{
-    const {name,email,phone,password} = req.body;
+userRouter.patch("/paymentSuccess/:id", async (req, res) => {
+  const id = req.params.id;
+  const payload = {
+    cart: [],
+    address: [],
+  };
+  try {
+    const user = await UserModel.updateOne({ _id: id }, payload);
+    res.send({
+      message: "Payment Successfully",
+    });
+  } catch (err) {
+    res.send({
+      message: err.message,
+    });
+  }
+});
 
-    try{
-        let user=await UserModel.find({email})
-        const admin = await AdminModel.findById({"_id":"63ca91895a0eb8269540a17d"})
-        const blockperson=admin.blockeduser
-        
-       const filtper = blockperson.filter((el)=>{
-            return el.email===email
-        })
-        if(filtper.length===0){
-            if(user.length===0){
-                bcrypt.hash(password, 5, async(err, hash)=> {
-                    if(err){
-                        console.log(err)
-                    }else{
-                        const user = new UserModel({name,email,password:hash,phone})
-                        await user.save()
-                        res.send("Successfully Registered ! Please Login !!")
-                    }
-                });
-            }else{
-                res.send("Already Registerd ! Please Login !")
-            }
-        }else{
-            res.send("You are blocked by admin !!!")
-        }
-        
-        
-    }catch(err){
-        res.send(err)
-    }
-})
-userRouter.post('/login',async(req,res)=>{
-    const {email,password} = req.body;
-
-    try{
-        const user = await UserModel.find({email:email})
-        if(user.length>0){
-            bcrypt.compare(password, user[0].password, async(err, result) => {
-                if(result){
-                    var token = jwt.sign({ userID:user[0]._id }, 'newuser');
-                    res.send({"msg":"Logged in !","usertoken":token,"id":user[0]._id})
-                }else{
-                    res.send("Wrong Credentials !")
-                }
+userRouter.post("/register", async (req, res) => {
+  const { name, email, password, phone } = req.body;
+  if (name && email && password && phone) {
+    const validateEmail = await UserModel.findOne({ email: email });
+    if (validateEmail) {
+      res.send({
+        message: "already registred user Please Login",
+        userId: validateEmail._id,
+      });
+    } else {
+      try {
+        bcrypt.hash(password, 10, async (err, hash_password) => {
+          if (err) {
+            res.send({
+              message: err.message,
             });
-        }else{
-            res.send("Authentication Failed !")
-        }
-    }catch(err){
-        res.send(err)
+          } else {
+            const newRegistration = new UserModel({
+              name,
+              email,
+              password: hash_password,
+              phone,
+            });
+            await newRegistration.save();
+            console.log(newRegistration);
+            await res.send({
+              message: "new registration successfully",
+            });
+          }
+        });
+      } catch (err) {
+        res.send({
+          message: err.message,
+        });
+      }
     }
-})
-userRouter.delete('/delete/:id',async(req,res)=>{
-    const id=req.params.id
-    try{
-        await UserModel.findByIdAndDelete({"_id":id})
-        res.send("user deleted !")
+  } else {
+    res.send({
+      message: "Please fill the required fields",
+    });
+  }
+});
 
-    }catch(err){
-        res.send(err)
+userRouter.post("/login", async (req, res) => {
+  const { email, password } = req.body;
+  if (email && password) {
+    try {
+      const user = await UserModel.find({ email });
+      if (user.length > 0) {
+        bcrypt.compare(password, user[0].password, (err, result) => {
+          if (result) {
+            const token = jwt.sign({ userId: user[0]._id }, "masai");
+            console.log(user);
+            res.send({
+              userId: user[0]._id,
+              message: "Login successfully",
+              token,
+            });
+          } else {
+            res.send({
+              message: "Wrong Password",
+            });
+          }
+        });
+      } else {
+        res.send({
+          message: "Email Address not found",
+        });
+      }
+    } catch (err) {
+      res.send({
+        message: err.message,
+      });
     }
-})
+  } else {
+    res.send({
+      message: "Please fill the required fields",
+    });
+  }
+});
+
+userRouter.delete("/delete/:id", async (req, res) => {
+  const id = req.params.id;
+  try {
+    await UserModel.findByIdAndDelete({ _id: id });
+    res.send("user deleted !");
+  } catch (err) {
+    res.send(err);
+  }
+});
 
 module.exports = {
-    userRouter
-}
+  userRouter,
+};
